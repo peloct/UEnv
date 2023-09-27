@@ -1,0 +1,9 @@
+<packets>
+    <packet name="AddButton" type="p2u">
+        <field name="id" type="string"/>
+    </packet>
+    <packet name="UIEvent" type="u2p">
+        <field name="clicked_button" type="string"/>
+        <field name="key" type="int"/>
+    </packet>
+</packets>
