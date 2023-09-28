@@ -11,8 +11,7 @@ They send messages in base64 encoded bytearray.
 ## Requirements
 
 1. Unity
-2. VSCode for python programming
-3. Your own C# IDE
+2. Your own C# IDE
 
 ## How To Use
 
@@ -44,3 +43,9 @@ UEvnConfig scriptable object contains every informations for how framework shoul
 3. Packet Def : Field for PacketDef.xml asset. Auto Packet Generation will reference this file.
 4. PyPacket Factory Path : Path for python script to which packet definitions will be generated.
 5. CsPacket Factory : Field for PacketFactory.cs asset. Packet class will be generated into this files.
+
+## Debugging
+
+This framework contains test code, and in main.py, it will open debugpy server.
+So if you use VSCode, then you can simply attach VSCode debugger to python for debbuging.
+Of course, if you don't use VSCode, then just remove it.
