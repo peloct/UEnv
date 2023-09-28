@@ -19,9 +19,9 @@ public class AutoPacketGen
             {"int", "int"},
             {"float", "float"},
             {"string", "string"},
-            {"ndarray_int", "NumpyArr<int>"},
-            {"ndarray_float", "NumpyArr<float>"},
-            {"ndarray_double", "NumpyArr<double>"},
+            {"ndarray_int", $"{nameof(NumpyArr)}<int>"},
+            {"ndarray_float", $"{nameof(NumpyArr)}<float>"},
+            {"ndarray_double", $"{nameof(NumpyArr)}<double>"},
         };
         
         Dictionary<string, string> numpyDataTypeMapping = new Dictionary<string, string>()
