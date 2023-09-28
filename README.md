@@ -11,7 +11,8 @@ They send messages in base64 encoded bytearray.
 ## Requirements
 
 1. Unity
-2. Your own C# IDE
+2. Your own IDE
+3. I think VSCode is recommended. (for debugpy utility)
 
 ## How To Use
 
