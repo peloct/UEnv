@@ -1,6 +1,6 @@
 # UEnv
 
-A lightweight project for programming in Python, using Unity as a graphical environment.
+A lightweight framework for Python programming, using Unity as a graphical environment.
 
 ## Concept
 
@@ -24,3 +24,23 @@ Once UEnvConfig is completed, then You can see example code.
 
 ## Functionality : Auto Packet Gneration
 
+Unity, Python interact each other through packet.
+Packet is a simple class instance, which has integer value key-code and bytearray data.
+
+
+This framework offers auto-packet generation.
+You can see test-packet definition in "PacketDef.xml".
+Once you specified your own packet definition, You can generate packets through "UIEnv/Generate Packet" button in Unity Menu item.
+
+
+Be warned that the auto packet generation will change contents of script files packet_factory.py and PacketFactory.cs.
+
+## UEnvConfig
+
+UEvnConfig scriptable object contains every informations for how framework should work.
+
+1. Python Path : Specifying your python binary path
+2. Script Path : Path for python script which will be run.
+3. Packet Def : Field for PacketDef.xml asset. Auto Packet Generation will reference this file.
+4. PyPacket Factory Path : Path for python script to which packet definitions will be generated.
+5. CsPacket Factory : Field for PacketFactory.cs asset. Packet class will be generated into this files.
