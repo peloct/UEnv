@@ -1,8 +1,7 @@
-﻿using System;
+﻿﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
-using System.Threading.Tasks;
 
 
 public partial class Packet
@@ -61,7 +60,7 @@ public partial class Packet
         AddInt(buffer, bytes.Length);
         buffer.AddRange(bytes);
     }
-
+    
     public static bool GetBool(byte[] buffer, ref int idx)
     {
         var value = BitConverter.ToBoolean(buffer, idx);
@@ -96,5 +95,62 @@ public partial class Packet
         var value = UTF8Encoding.UTF8.GetString(buffer, idx, byteCount);
         idx += byteCount;
         return value;
+    }
+
+    public static NumpyArr<int> GetNumpyIntArray(byte[] buffer, ref int idx)
+    {
+        int dim = GetInt(buffer, ref idx);
+        int[] shape = new int[dim];
+        int dataNum = 1;
+
+        for (int i = 0; i < dim; ++i)
+        {
+            shape[i] = GetInt(buffer, ref idx);
+            dataNum *= shape[i];
+        }
+        
+        int[] data = new int[dataNum];
+        for (int i = 0; i < data.Length; ++i)
+            data[i] = GetInt(buffer, ref idx);
+
+        return new NumpyArr<int>(data, shape);
+    }
+    
+    public static NumpyArr<float> GetNumpyFloatArray(byte[] buffer, ref int idx)
+    {
+        int dim = GetInt(buffer, ref idx);
+        int[] shape = new int[dim];
+        int dataNum = 1;
+
+        for (int i = 0; i < dim; ++i)
+        {
+            shape[i] = GetInt(buffer, ref idx);
+            dataNum *= shape[i];
+        }
+        
+        float[] data = new float[dataNum];
+        for (int i = 0; i < data.Length; ++i)
+            data[i] = GetFloat(buffer, ref idx);
+
+        return new NumpyArr<float>(data, shape);
+    }
+    
+    public static NumpyArr<double> GetNumpyDoubleArray(byte[] buffer, ref int idx)
+    {
+        int dim = GetInt(buffer, ref idx);
+        int[] shape = new int[dim];
+        int dataNum = 1;
+
+        for (int i = 0; i < dim; ++i)
+        {
+            shape[i] = GetInt(buffer, ref idx);
+            dataNum *= shape[i];
+        }
+        
+        double[] data = new double[dataNum];
+        for (int i = 0; i < data.Length; ++i)
+            data[i] = GetDouble(buffer, ref idx);
+
+        return new NumpyArr<double>(data, shape);
     }
 }

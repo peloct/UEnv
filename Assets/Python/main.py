@@ -8,7 +8,7 @@ env = UEnv()
 
 def main():
     debugpy.listen(('localhost', 5678))
-    env.send_packet(P2UTest("P2UTest"))
+    env.send_packet(P2UTest("P2UTest", np.array([[1, 2], [3, 4]], dtype=np.float32), 5, 6.0))
 
     def on_u2p(packet):
         if isinstance(packet, U2PTest):

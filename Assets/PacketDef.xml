@@ -1,8 +1,14 @@
 <packets>
-    <packet name="P2UTest" type="p2u">
+    <packet name="P2UTest" type="p2u">      <!-- p2u : python to unity -->
         <field name="text" type="string"/>
+        <!-- You can send ndarray. ndarray type can be used only in p2u packet -->
+        <!-- dtype must be specified -->
+        <field name="ndarray_data" type="ndarray" dtype="float"/>
+        <field name="int_data" type="int"/>
+        <field name="float_data" type="float"/>
     </packet>
-    <packet name="U2PTest" type="u2p">
+    
+    <packet name="U2PTest" type="u2p">      <!-- u2p : unity to python -->
         <field name="text" type="string"/>
     </packet>
 </packets>

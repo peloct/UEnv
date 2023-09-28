@@ -11,12 +11,24 @@ public class AutoPacketGen
     [MenuItem("UEnv/Generate Packet")]
     public static void GeneratePacket()
     {
+        const string numpy_name = "np";
+        
         Dictionary<string, string> fieldTypeToCSDataType = new Dictionary<string, string>()
         {
             {"bool", "bool"},
             {"int", "int"},
             {"float", "float"},
             {"string", "string"},
+            {"ndarray_int", "NumpyArr<int>"},
+            {"ndarray_float", "NumpyArr<float>"},
+            {"ndarray_double", "NumpyArr<double>"},
+        };
+        
+        Dictionary<string, string> numpyDataTypeMapping = new Dictionary<string, string>()
+        {
+            {"ndarray_int", $"{numpy_name}.int32"},
+            {"ndarray_float", $"{numpy_name}.float32"},
+            {"ndarray_double", $"{numpy_name}.float64"},
         };
         
         Dictionary<string, string> fieldTypeToPYDataType = new Dictionary<string, string>()
@@ -25,6 +37,9 @@ public class AutoPacketGen
             {"int", "int"},
             {"float", "float"},
             {"string", "str"},
+            {"ndarray_int", $"{numpy_name}.ndarray"},
+            {"ndarray_float", $"{numpy_name}.ndarray"},
+            {"ndarray_double", $"{numpy_name}.ndarray"},
         };
         
         Dictionary<string, string> fieldTypeToPYDataParser = new Dictionary<string, string>()
@@ -42,6 +57,9 @@ public class AutoPacketGen
             {"float", "GetFloat"},
             {"double", "GetDouble"},
             {"string", "GetString"},
+            {"ndarray_int", "GetNumpyIntArray"},
+            {"ndarray_float", "GetNumpyFloatArray"},
+            {"ndarray_double", "GetNumpyDoubleArray"},
         };
         
         Dictionary<string, string> fieldTypeToCSDataWriter = new Dictionary<string, string>()
@@ -107,6 +125,13 @@ public class AutoPacketGen
                 var att = eachFields[j].Attributes;
                 var fieldName = FindAttributeValue(att, "name");
                 var fieldType = FindAttributeValue(att, "type");
+                
+                if (fieldType == "ndarray")
+                {
+                    var dtype = FindAttributeValue(att, "dtype");
+                    fieldType = $"{fieldType}_{dtype}";
+                }
+                
                 fields.Add(fieldName, fieldType);
                 fieldNames.Add(fieldName);
             }
@@ -120,13 +145,22 @@ public class AutoPacketGen
                 
                 csPacketFactoryInit.AppendLine($"        AddGenerator({packetKeyCode}, (keyCode, data) => new {packetName}(keyCode, data));");
 
+                StringBuilder pyNumpyArrayTypeCheck = new StringBuilder();
+                
                 if (fieldNames.Count > 0)
                 {
                     List<string> fieldNamesWithPYType = new List<string>();
                     for (int j = 0; j < fieldNames.Count; ++j)
                     {
-                        var pyType = fieldTypeToPYDataType[fields[fieldNames[j]]];
+                        var fieldType = fields[fieldNames[j]];
+                        var pyType = fieldTypeToPYDataType[fieldType];
                         fieldNamesWithPYType.Add($"{fieldNames[j]}:{pyType}");
+                        
+                        if (fieldType.StartsWith("ndarray"))
+                        {
+                            var ndtype = numpyDataTypeMapping[fieldType];
+                            pyNumpyArrayTypeCheck.AppendLine($"        assert {fieldNames[j]}.dtype == {ndtype}");
+                        }
                     }
                     
                     pyConstInput = "self, " + string.Join(", ", fieldNamesWithPYType);
@@ -158,6 +192,7 @@ $@"
 class {packetName}(Packet):
     def __init__({pyConstInput}):
         super().__init__({packetKeyCode}, {dataInput})
+{pyNumpyArrayTypeCheck.ToString()}
 ");
                 
                 csPacketFactory.AppendLine($"public class {packetName} : Packet");
