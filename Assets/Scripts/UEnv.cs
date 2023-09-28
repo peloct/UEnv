@@ -5,6 +5,7 @@ using UnityEngine;
 using System.Threading.Tasks;
 using System.Diagnostics;
 using System.IO;
+using System.Text;
 using System.Linq;
 using Debug = UnityEngine.Debug;
 
@@ -24,18 +25,6 @@ public class UEnv : MonoBehaviour
         Packet.InitFactory();
         
         receivedPackets = new Queue<Packet>();
-        
-        RegisterPacketHandler((int)SystemPacketCode.LOG, packet =>
-        {
-            int idx = 0;
-            Debug.Log(Packet.GetString(packet.Data, ref idx));
-        });
-        
-        RegisterPacketHandler((int)SystemPacketCode.EXCEPTION, packet =>
-        {
-            int idx = 0;
-            Debug.LogError(Packet.GetString(packet.Data, ref idx));
-        });
         
         var config = UEnvConfig.Load();
         pythonPath = config.pythonPath;
@@ -75,11 +64,6 @@ public class UEnv : MonoBehaviour
             if (packetHandlerDic.TryGetValue(packet.KeyCode, out var handlerList))
                 foreach (var eachHandler in handlerList)
                     eachHandler(packet);
-        }
-
-        if (Input.GetKeyDown(KeyCode.A))
-        {
-            SendPacket(new UIEvent("you", 2));
         }
     }
 
@@ -127,40 +111,76 @@ public class UEnv : MonoBehaviour
                     var base64string = reader.ReadLine();
                     if (base64string != null)
                     {
-                        byte[] bytes = Convert.FromBase64String(base64string);
-                        buffer.AddRange(bytes);
-
-                        if (buffer.Count > 0)
+                        if (base64string.Length > 0 && base64string[0] == '!')
                         {
-                            while ((!isReadingPacket && buffer.Count >= 8) || packetSize <= buffer.Count)
+                            string log = base64string;
+                            int type = 0;
+                            if (log.Length >= 2 && log[1] == '!')
+                                type = 1;
+                            if (log.Length >= 3 && log[2] == '!' && type == 1)
+                                type = 2;
+                            switch (type)
                             {
-                                if (!isReadingPacket)
-                                {
-                                    isReadingPacket = true;
-                                    var packetMetaBytes = buffer.GetRange(0, 8).ToArray();
-                                    buffer.RemoveRange(0, 8);
-                                    int readIdx = 0;
-                                    packetKey = Packet.GetInt(packetMetaBytes, ref readIdx);
-                                    packetSize = Packet.GetInt(packetMetaBytes, ref readIdx);
-                                }
-
-                                if (packetSize <= buffer.Count)
-                                {
-                                    var packetBytes = buffer.GetRange(0, packetSize).ToArray();
-                                    buffer.RemoveRange(0, packetSize);
-                                    newPackets.Add(Packet.GetPacket(packetKey, packetBytes));
-                                    isReadingPacket = false;
-                                    packetSize = int.MaxValue;
-                                }
+                                case 0:
+                                    if (base64string.Length >= 2)
+                                    {
+                                        var bytes = Convert.FromBase64String(base64string[1..]);
+                                        Debug.Log(UTF8Encoding.UTF8.GetString(bytes, 0, bytes.Length));
+                                    }
+                                    break;
+                                case 1:
+                                    if (base64string.Length >= 3)
+                                    {
+                                        var bytes = Convert.FromBase64String(base64string[2..]);
+                                        Debug.LogWarning(UTF8Encoding.UTF8.GetString(bytes, 0, bytes.Length));
+                                    }
+                                    break;
+                                case 2:
+                                    if (base64string.Length >= 4)
+                                    {
+                                        var bytes = Convert.FromBase64String(base64string[3..]);
+                                        Debug.LogError(UTF8Encoding.UTF8.GetString(bytes, 0, bytes.Length));
+                                    }
+                                    break;
                             }
+                        }
+                        else
+                        {
+                            byte[] bytes = Convert.FromBase64String(base64string);
+                            buffer.AddRange(bytes);
 
-                            if (newPackets.Count > 0)
+                            if (buffer.Count > 0)
                             {
-                                lock (receivedPackets)
+                                while ((!isReadingPacket && buffer.Count >= 8) || packetSize <= buffer.Count)
                                 {
-                                    for (int i = 0; i < newPackets.Count; ++i)
-                                        receivedPackets.Enqueue(newPackets[i]);
-                                    newPackets.Clear();
+                                    if (!isReadingPacket)
+                                    {
+                                        isReadingPacket = true;
+                                        var packetMetaBytes = buffer.GetRange(0, 8).ToArray();
+                                        buffer.RemoveRange(0, 8);
+                                        int readIdx = 0;
+                                        packetKey = Packet.GetInt(packetMetaBytes, ref readIdx);
+                                        packetSize = Packet.GetInt(packetMetaBytes, ref readIdx);
+                                    }
+
+                                    if (packetSize <= buffer.Count)
+                                    {
+                                        var packetBytes = buffer.GetRange(0, packetSize).ToArray();
+                                        buffer.RemoveRange(0, packetSize);
+                                        newPackets.Add(Packet.GetPacket(packetKey, packetBytes));
+                                        isReadingPacket = false;
+                                        packetSize = int.MaxValue;
+                                    }
+                                }
+
+                                if (newPackets.Count > 0)
+                                {
+                                    lock (receivedPackets)
+                                    {
+                                        for (int i = 0; i < newPackets.Count; ++i)
+                                            receivedPackets.Enqueue(newPackets[i]);
+                                        newPackets.Clear();
+                                    }
                                 }
                             }
                         }

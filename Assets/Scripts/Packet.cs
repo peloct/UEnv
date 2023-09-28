@@ -5,12 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 
 
-public enum SystemPacketCode: int
-{
-    EXCEPTION = -1000,
-    LOG = -1001
-}
-
 public partial class Packet
 {
     private static Dictionary<int, Func<int, byte[], Packet>> generators = new Dictionary<int, Func<int, byte[], Packet>>();

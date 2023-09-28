@@ -1,6 +1,6 @@
 import debugpy
 from uenv import UEnv
-from packet_factory import AddButton, UIEvent
+from packet_factory import *
 
 
 env = UEnv()
@@ -8,13 +8,13 @@ env = UEnv()
 
 def main():
     debugpy.listen(('localhost', 5678))
-    env.send_packet(AddButton("heelo"))
+    env.send_packet(P2UTest("P2UTest"))
 
-    def on_ui_vent(packet):
-        if isinstance(packet, UIEvent):
-            env.log(packet.clicked_button)
+    def on_u2p(packet):
+        if isinstance(packet, U2PTest):
+            env.log(packet.text)
 
-    env.register_packet_handler(UIEvent.KEY, on_ui_vent)
+    env.register_packet_handler(U2PTest.KEY, on_u2p)
     env.loop()
 
 

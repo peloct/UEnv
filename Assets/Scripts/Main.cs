@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -10,12 +11,20 @@ public class Main : MonoBehaviour
     void Start()
     {
         env = GetComponent<UEnv>();
-        env.RegisterPacketHandler(AddButton.KEY, packet =>
+        env.RegisterPacketHandler(P2UTest.KEY, packet =>
         {
-            var addButton = packet as AddButton;
-            Debug.Log(addButton.id);
+            var p2uTest = packet as P2UTest;
+            Debug.Log(p2uTest.text);
         });
         
         env.Run();
+    }
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.A))
+        {
+            env.SendPacket(new U2PTest("U2PTest"));
+        }
     }
 }

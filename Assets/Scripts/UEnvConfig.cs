@@ -11,7 +11,7 @@ public class UEnvConfig : ScriptableObject
     public TextAsset packetDef;
     public string pyPacketFactoryPath;
     public TextAsset csPacketFactory;
-
+    
     public static UEnvConfig Load()
     {
         var assets = AssetDatabase.FindAssets("UEnvConfig t:UEnvConfig");
@@ -29,6 +29,7 @@ public class UEnvConfig : ScriptableObject
 
         var assetPath = AssetDatabase.GUIDToAssetPath(assets[0]);
         var config = AssetDatabase.LoadAssetAtPath<UEnvConfig>(assetPath);
+        
         return config;
     }
 }

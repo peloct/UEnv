@@ -33,7 +33,19 @@ class UEnv:
     def log(self, text):
         if not isinstance(text, str):
             text = str(text)
-        self.send_data_as_packet(LOG_PACKET, text)
+        print(f'!{base64.b64encode(text.encode("utf-8")).decode("ascii")}')
+
+
+    def log_warning(self, text):
+        if not isinstance(text, str):
+            text = str(text)
+        print(f'!!{base64.b64encode(text.encode("utf-8")).decode("ascii")}')
+
+
+    def log_error(self, text):
+        if not isinstance(text, str):
+            text = str(text)
+        print(f'!!!{base64.b64encode(text.encode("utf-8")).decode("ascii")}')
 
 
     def send_packet(self, packet):
@@ -46,7 +58,7 @@ class UEnv:
             byte = meta_byte + data_byte
             self.push_output_buffer(byte)
         except Exception as ex:
-            self.send_data_as_packet(EXCEPTION_CODE, traceback.format_exc())
+            self.log_error(traceback.format_exc())
 
 
     def send_data_as_packet(self, key_code, *args):
@@ -70,7 +82,7 @@ class UEnv:
             if lock_acquired:
                 self.output_lock.release()
                 lock_acquired = False
-            self.send_data_as_packet(EXCEPTION_CODE, traceback.format_exc())
+            self.log_error(traceback.format_exc())
 
 
     def input_thread():
@@ -87,7 +99,7 @@ class UEnv:
             if lock_acquired:
                 UEnv.env.input_lock.release()
                 lock_acquired = False
-            UEnv.env.send_data_as_packet(EXCEPTION_CODE, traceback.format_exc())
+            UEnv.env.log_error(traceback.format_exc())
 
 
     def loop(self):
@@ -143,11 +155,13 @@ class UEnv:
                 for each_packet in new_packets:
                     if each_packet.key_code in self.packet_handler_dic:
                         handlers = self.packet_handler_dic[each_packet.key_code]
-
-                        for each_handler in handlers:
-                            each_handler(each_packet)
+                        try:
+                            for each_handler in handlers:
+                                each_handler(each_packet)
+                        except Exception as ex:
+                            self.log_error(traceback.format_exc())
                 
                 new_packets.clear()
                 time.sleep(0.001)
         except Exception as ex:
-            print(traceback.format_exc())
+            self.log_error(traceback.format_exc())
