@@ -6,11 +6,15 @@ using UnityEngine.Serialization;
 [CreateAssetMenu(fileName = "UEnvConfig", menuName = "Create UEnvConfig", order = 1)]
 public class UEnvConfig : ScriptableObject
 {
-    public string pythonPath;
-    public string scriptPath;
+    [SerializeField] string pythonPath;
+    [SerializeField] string scriptPath;
     public TextAsset packetDef;
-    public string pyPacketFactoryPath;
+    [SerializeField] string pyPacketFactoryPath;
     public TextAsset csPacketFactory;
+
+    public string PyPacketFactoryPath => pyPacketFactoryPath.Replace("<project>", Application.dataPath);
+    public string PythonPath => pythonPath.Replace("<project>", Application.dataPath);
+    public string ScriptPath => scriptPath.Replace("<project>", Application.dataPath);
     
     public static UEnvConfig Load()
     {

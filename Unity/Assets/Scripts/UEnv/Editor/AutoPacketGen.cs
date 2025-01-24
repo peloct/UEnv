@@ -19,6 +19,10 @@ public class AutoPacketGen
             {"int", "int"},
             {"float", "float"},
             {"string", "string"},
+            {"bool[]", "bool[]"},
+            {"int[]", "int[]"},
+            {"float[]", "float[]"},
+            {"string[]", "string[]"},
             {"ndarray_int", $"{nameof(NumpyArr)}<int>"},
             {"ndarray_float", $"{nameof(NumpyArr)}<float>"},
             {"ndarray_double", $"{nameof(NumpyArr)}<double>"},
@@ -37,6 +41,10 @@ public class AutoPacketGen
             {"int", "int"},
             {"float", "float"},
             {"string", "str"},
+            {"bool[]", "list"},
+            {"int[]", "list"},
+            {"float[]", "list"},
+            {"string[]", "list"},
             {"ndarray_int", $"{numpy_name}.ndarray"},
             {"ndarray_float", $"{numpy_name}.ndarray"},
             {"ndarray_double", $"{numpy_name}.ndarray"},
@@ -57,6 +65,11 @@ public class AutoPacketGen
             {"float", "GetFloat"},
             {"double", "GetDouble"},
             {"string", "GetString"},
+            {"bool[]", "GetBools"},
+            {"int[]", "GetInts"},
+            {"float[]", "GetFloats"},
+            {"double[]", "GetDoubles"},
+            {"string[]", "GetStrings"},
             {"ndarray_int", "GetNumpyIntArray"},
             {"ndarray_float", "GetNumpyFloatArray"},
             {"ndarray_double", "GetNumpyDoubleArray"},
@@ -90,7 +103,7 @@ public class AutoPacketGen
         var path = Application.dataPath;
         
         var csPacketFactoryFullpath = path.Replace("Assets", AssetDatabase.GetAssetPath(config.csPacketFactory));
-        var pyPacketFactoryFullpath = config.pyPacketFactoryPath;
+        var pyPacketFactoryFullpath = config.PyPacketFactoryPath;
         
         StringBuilder pyPacketFactory = new StringBuilder();
         StringBuilder pyPacketFactoryInit = new StringBuilder();
@@ -116,6 +129,8 @@ public class AutoPacketGen
 
             List<string> fieldNames = new List<string>();
             Dictionary<string, string> fields = new Dictionary<string, string>();
+            Dictionary<string, string> defaultValues = new Dictionary<string, string>();
+            
             var eachFields = childNodes[i].ChildNodes;
             for (int j = 0; j < eachFields.Count; ++j)
             {
@@ -125,6 +140,10 @@ public class AutoPacketGen
                 var att = eachFields[j].Attributes;
                 var fieldName = FindAttributeValue(att, "name");
                 var fieldType = FindAttributeValue(att, "type");
+                var defaultValue = FindAttributeValue(att, "default");
+
+                if (defaultValue != null)
+                    defaultValues.Add(fieldName, defaultValue);
                 
                 if (fieldType == "ndarray")
                 {
@@ -154,7 +173,14 @@ public class AutoPacketGen
                     {
                         var fieldType = fields[fieldNames[j]];
                         var pyType = fieldTypeToPYDataType[fieldType];
-                        fieldNamesWithPYType.Add($"{fieldNames[j]}:{pyType}");
+                        
+                        string defaultValue;
+                        if (defaultValues.TryGetValue(fieldNames[j], out defaultValue))
+                            defaultValue = $" = {defaultValue}";
+                        else
+                            defaultValue = "";
+                        
+                        fieldNamesWithPYType.Add($"{fieldNames[j]}:{pyType}{defaultValue}");
                         
                         if (fieldType.StartsWith("ndarray"))
                         {
@@ -217,7 +243,14 @@ $@"    public {packetName}(int keyCode, byte[] data) : base(keyCode, data)");
                     for (int j = 0; j < fieldNames.Count; ++j)
                     {
                         var csType = fieldTypeToCSDataType[fields[fieldNames[j]]];
-                        fieldNamesWithPYType.Add($"{csType} {fieldNames[j]}");
+                        
+                        string defaultValue;
+                        if (defaultValues.TryGetValue(fieldNames[j], out defaultValue))
+                            defaultValue = $" = {defaultValue}";
+                        else
+                            defaultValue = "";
+                        
+                        fieldNamesWithPYType.Add($"{csType} {fieldNames[j]}{defaultValue}");
                     }
                     
                     csConstInput = string.Join(", ", fieldNamesWithPYType);

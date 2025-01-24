@@ -7,7 +7,7 @@ from packet_factory import init_factory
 
 class UEnv:
 
-    def __init__(self):
+    def __init__(self, run_by_unity=True):
         UEnv.env = self
 
         self.input_lock = threading.Lock()
@@ -17,6 +17,7 @@ class UEnv:
         self.output_buffer = []
 
         self.packet_handler_dic = {}
+        self.run_by_unity = run_by_unity
         init_factory()
 
 
@@ -33,22 +34,34 @@ class UEnv:
     def log(self, text):
         if not isinstance(text, str):
             text = str(text)
-        print(f'!{base64.b64encode(text.encode("utf-8")).decode("ascii")}')
+        if self.run_by_unity:
+            print(f'!{base64.b64encode(text.encode("utf-8")).decode("ascii")}')
+        else:
+            print(text)
 
 
     def log_warning(self, text):
         if not isinstance(text, str):
             text = str(text)
-        print(f'!!{base64.b64encode(text.encode("utf-8")).decode("ascii")}')
+        if self.run_by_unity:
+            print(f'!!{base64.b64encode(text.encode("utf-8")).decode("ascii")}')
+        else:
+            print(text)
 
 
     def log_error(self, text):
         if not isinstance(text, str):
             text = str(text)
-        print(f'!!!{base64.b64encode(text.encode("utf-8")).decode("ascii")}')
+        if self.run_by_unity:
+            print(f'!!!{base64.b64encode(text.encode("utf-8")).decode("ascii")}')
+        else:
+            print(text)
 
 
     def send_packet(self, packet):
+        if not self.run_by_unity:
+            return
+        
         try:
             assert isinstance(packet, Packet)
             meta_byte = bytearray()

@@ -60,6 +60,51 @@ public partial class Packet
         AddInt(buffer, bytes.Length);
         buffer.AddRange(bytes);
     }
+
+    public static bool[] GetBools(byte[] buffer, ref int idx)
+    {
+        int length = GetInt(buffer, ref idx);
+        bool[] res = new bool[length];
+        for (int i = 0; i < length; ++i)
+            res[i] = GetBool(buffer, ref idx);
+        return res;
+    }
+
+    public static float[] GetFloats(byte[] buffer, ref int idx)
+    {
+        int length = GetInt(buffer, ref idx);
+        float[] res = new float[length];
+        for (int i = 0; i < length; ++i)
+            res[i] = GetFloat(buffer, ref idx);
+        return res;
+    }
+
+    public static double[] GetDoubles(byte[] buffer, ref int idx)
+    {
+        int length = GetInt(buffer, ref idx);
+        double[] res = new double[length];
+        for (int i = 0; i < length; ++i)
+            res[i] = GetDouble(buffer, ref idx);
+        return res;
+    }
+
+    public static int[] GetInts(byte[] buffer, ref int idx)
+    {
+        int length = GetInt(buffer, ref idx);
+        int[] res = new int[length];
+        for (int i = 0; i < length; ++i)
+            res[i] = GetInt(buffer, ref idx);
+        return res;
+    }
+
+    public static string[] GetStrings(byte[] buffer, ref int idx)
+    {
+        int length = GetInt(buffer, ref idx);
+        string[] res = new string[length];
+        for (int i = 0; i < length; ++i)
+            res[i] = GetString(buffer, ref idx);
+        return res;
+    }
     
     public static bool GetBool(byte[] buffer, ref int idx)
     {

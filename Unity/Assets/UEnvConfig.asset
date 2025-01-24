@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9f3b4ff9701b47afa666536115f4334c, type: 3}
   m_Name: UEnvConfig
   m_EditorClassIdentifier: 
-  pythonPath: /usr/bin/python3
-  scriptPath: /home/junwoolee/my/UEnv/Assets/Python/main.py
+  pythonPath: C:\Users\user\AppData\Local\Programs\Python\Python311\python.exe
+  scriptPath: <project>/../../main.py
   packetDef: {fileID: 4900000, guid: 7a64dd72eb9149e487ab96ed8d4a74cf, type: 3}
-  pyPacketFactoryPath: /home/junwoolee/my/UEnv/Assets/Python/packet_factory.py
+  pyPacketFactoryPath: <project>/../../packet_factory.py
   csPacketFactory: {fileID: 11500000, guid: 8adf79a1be3f445cbc58d3da1005935c, type: 3}

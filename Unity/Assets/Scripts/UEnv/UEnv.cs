@@ -27,8 +27,8 @@ public class UEnv : MonoBehaviour
         receivedPackets = new Queue<Packet>();
         
         var config = UEnvConfig.Load();
-        pythonPath = config.pythonPath;
-        scriptPath = config.scriptPath;
+        pythonPath = config.PythonPath;
+        scriptPath = config.ScriptPath;
             
         RunPython();
     }
@@ -61,6 +61,8 @@ public class UEnv : MonoBehaviour
         while (receivedPackets.Count > 0)
         {
             var packet = receivedPackets.Dequeue();
+            if (packet == null)
+                continue;
             if (packetHandlerDic.TryGetValue(packet.KeyCode, out var handlerList))
                 foreach (var eachHandler in handlerList)
                     eachHandler(packet);
@@ -146,8 +148,16 @@ public class UEnv : MonoBehaviour
                         }
                         else
                         {
-                            byte[] bytes = Convert.FromBase64String(base64string);
-                            buffer.AddRange(bytes);
+                            try
+                            {
+                                byte[] bytes = Convert.FromBase64String(base64string);
+                                buffer.AddRange(bytes);
+                            }
+                            catch (Exception e)
+                            {
+                                Debug.LogError(e);
+                                Debug.LogError(base64string);
+                            }
 
                             if (buffer.Count > 0)
                             {

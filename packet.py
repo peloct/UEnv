@@ -47,6 +47,11 @@ def pack_data(*args, buffer=None):
                 buffer.extend(struct.pack('<i', dim))
             data = data.tobytes()
             buffer.extend(data)
+        elif isinstance(data, list):
+            length = len(data)
+            buffer.extend(struct.pack('<i', length))
+            for i in range(len(data)):
+                pack_data(data[i], buffer=buffer)
 
     return buffer
 

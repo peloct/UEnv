@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class NumpyArr
@@ -5,6 +6,8 @@ public class NumpyArr
     protected int[] shape;
     protected int[] dataOffsets;
 
+    public IReadOnlyList<int> Shape => shape;
+    
     public NumpyArr(int[] shape)
     {
         this.shape = shape;
@@ -23,11 +26,18 @@ public class NumpyArr
     {
         return shape[i];
     }
+
+    public int Length(System.Index index)
+    {
+        return shape[index];
+    }
 }
 
 public class NumpyArr<T> : NumpyArr
 {
     private T[] data;
+
+    public IReadOnlyList<T> Data => data;
     
     public NumpyArr(T[] data, params int[] shape) : base(shape)
     {
